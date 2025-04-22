@@ -1,0 +1,10 @@
+SP-3: Procedimiento para obtener un empleado por su ID
+
+CREATE PROCEDURE sp_get_employee_by_id(
+    IN p_id INT
+)
+BEGIN
+    SELECT id, name, position, salary, hire_date, department
+    FROM employees
+    WHERE id = p_id;
+END
