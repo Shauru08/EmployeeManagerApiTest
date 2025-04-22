@@ -2,6 +2,10 @@ package com.employee_manager_api.config;
 
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
+import software.amazon.awssdk.services.rds.RdsClient;
+import software.amazon.awssdk.services.rds.model.DBInstance;
+import software.amazon.awssdk.services.rds.model.DescribeDbInstancesRequest;
+import software.amazon.awssdk.services.rds.model.DescribeDbInstancesResponse;
 import software.amazon.awssdk.services.secretsmanager.SecretsManagerClient;
 import software.amazon.awssdk.services.secretsmanager.model.GetSecretValueRequest;
 import software.amazon.awssdk.services.secretsmanager.model.GetSecretValueResponse;
@@ -15,6 +19,12 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
+/**
+ * Clase encargada de establecer y mantener una conexión a la base de datos
+ * MySQL, recuperando las credenciales de AWS Secrets Manager y la información
+ * de host y puerto desde la instancia RDS asociada al identificador
+ * proporcionado.
+ */
 public class DatabaseConnection {
 
     private static final Logger logger = LogManager.getLogger(DatabaseConnection.class);
@@ -30,6 +40,7 @@ public class DatabaseConnection {
     private static final String AWS_REGION = EnvLoad.get("MY_AWS_REGION");
     private static final String AWS_ACCESS_KEY_ID = EnvLoad.get("MY_AWS_ACCESS_KEY_ID");
     private static final String AWS_SECRET_ACCESS_KEY = EnvLoad.get("MY_AWS_SECRET_ACCESS_KEY");
+    private static final String DB_INSTANCE_IDENTIFIER = EnvLoad.get("DB_INSTANCE_IDENTIFIER");
 
     /**
      * Constructor privado que inicializa la conexion a la base de datos. Se
@@ -45,34 +56,55 @@ public class DatabaseConnection {
             throw new IllegalStateException("Las credenciales de AWS no estan configuradas.");
         }
 
-        // Configura el cliente de Secrets Manager
-        logger.info("Inicializando cliente de AWS Secrets Manager en la region: {}", AWS_REGION);
-        SecretsManagerClient client = SecretsManagerClient.builder()
+        // Crea credenciales básicas de AWS para los clientes de SDK
+        AwsBasicCredentials awsCreds = AwsBasicCredentials.create(AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY);
+
+        // Configura el cliente de AWS Secrets Manager
+        logger.info("Inicializando Secrets Manager en región {}", AWS_REGION);
+        SecretsManagerClient secretsClient = SecretsManagerClient.builder()
                 .region(Region.of(AWS_REGION))
-                .credentialsProvider(StaticCredentialsProvider.create(
-                        AwsBasicCredentials.create(AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY)
-                ))
+                .credentialsProvider(StaticCredentialsProvider.create(awsCreds))
                 .build();
 
-        // Solicita el secreto de la base de datos
-        logger.info("Solicitando el secreto con ARN: {}", SECRET_ARN);
-        GetSecretValueRequest request = GetSecretValueRequest.builder()
+        // Solicita el secreto usando el ARN proporcionado
+        logger.info("Obteniendo secreto con ARN: {}", SECRET_ARN);
+        GetSecretValueResponse response = secretsClient.getSecretValue(GetSecretValueRequest.builder()
                 .secretId(SECRET_ARN)
-                .build();
-        GetSecretValueResponse response = client.getSecretValue(request);
+                .build());
+        logger.info("Secreto recuperado correctamente");
 
-        logger.debug("Secreto obtenido exitosamente.");
-
-        // Extrae las credenciales del JSON retornado
+        // Extrae del JSON los valores de acceso (usuario, contraseña, nombre de base)
         JsonObject secretJson = JsonParser.parseString(response.secretString()).getAsJsonObject();
         String username = secretJson.get("username").getAsString();
         String password = secretJson.get("password").getAsString();
-        String host = secretJson.get("host").getAsString();
-        String database = secretJson.get("dbInstanceIdentifier").getAsString();
+        String dbIdentifier = secretJson.has("dbInstanceIdentifier") && !secretJson.get("dbInstanceIdentifier").isJsonNull()
+                ? secretJson.get("dbInstanceIdentifier").getAsString()
+                : DB_INSTANCE_IDENTIFIER;
+        logger.info("Identificador de base obtenido: {}", dbIdentifier);
+
+        // Construye el cliente RDS para consultar los datos del endpoint
+        logger.info("Consultando RDS con identificador: {}", dbIdentifier);
+        RdsClient rdsClient = RdsClient.builder()
+                .region(Region.of(AWS_REGION))
+                .credentialsProvider(StaticCredentialsProvider.create(awsCreds))
+                .build();
+
+        // Obtiene información de la instancia como host y puerto
+        DescribeDbInstancesResponse dbResponse = rdsClient.describeDBInstances(
+                DescribeDbInstancesRequest.builder().dbInstanceIdentifier(dbIdentifier).build());
+        logger.info("Metadatos de instancia RDS obtenidos");
+
+        DBInstance instance = dbResponse.dbInstances().get(0);
+        String host = instance.endpoint().address();
+        String port = String.valueOf(instance.endpoint().port());
+        logger.info("Endpoint de RDS: {}:{}", host, port);
 
         // Construye la cadena de conexion JDBC
-        String url = "jdbc:mysql://" + host + ":3306/" + database + "?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC";
-        logger.info("Conectando a la base de datos en la URL: {}", url);
+        String url = String.format(
+                "jdbc:mysql://%s:%s/%s?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC",
+                host, port, dbIdentifier
+        );
+        logger.info("Conectando a base de datos con URL JDBC armada");
 
         // Establece la conexion
         this.connection = DriverManager.getConnection(url, username, password);

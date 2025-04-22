@@ -1,8 +1,0 @@
-SP-5: Procedimiento para eliminar un empleado por su ID
-
-CREATE PROCEDURE sp_delete_employee(
-    IN p_id INT
-)
-BEGIN
-    DELETE FROM employees WHERE id = p_id;
-END

@@ -1,7 +1,0 @@
-SP-2: Procedimiento para obtener todos los empleados
-
-CREATE PROCEDURE sp_get_all_employees()
-BEGIN
-    SELECT id, name, position, salary, hire_date, department
-    FROM employees;
-END

@@ -28,7 +28,7 @@ public class EmployeeHandler implements RequestHandler<Map<String, Object>, Map<
             String path = (String) input.get("path");
             String httpMethod = (String) input.get("httpMethod");
 
-            logger.info("[Init] Request recibida - Ruta: {} - Método: {}", path, httpMethod);
+            logger.info("[Init] Request recibida - Ruta: {} - Metodo: {}", path, httpMethod);
 
             // Extraer proxyPath desde pathParameters
             Map<String, String> pathParams = (Map<String, String>) input.get("pathParameters");
@@ -143,7 +143,7 @@ public class EmployeeHandler implements RequestHandler<Map<String, Object>, Map<
 
             // /employees/salary/top GET
             topSalaryHandlers.put("GET", () -> {
-                //Devuelve una lista de los 10 empleados con los salarios más altos ordenados de forma descendente, en caso exitoso, devuelve un codigo de estado HTTP 200, Ok.
+                //Devuelve una lista de los 10 empleados con los salarios mas altos ordenados de forma descendente, en caso exitoso, devuelve un codigo de estado HTTP 200, Ok.
                 try {
                     logger.info("Obteniendo empleados con los mayores salarios");
                     List<Employee> topEmployees = employeeService.getTopSalaries();
@@ -162,6 +162,7 @@ public class EmployeeHandler implements RequestHandler<Map<String, Object>, Map<
             routeHandlers.put("/employees/{id}", employeeIdHandlers);
             routeHandlers.put("/employees/salary/top", topSalaryHandlers);
 
+            // Routing manual basado en proxyPath
             if (proxyPath != null && proxyPath.matches("employees/\\d+") && employeeIdHandlers.containsKey(httpMethod)) {
                 employeeIdHandlers.get(httpMethod).run();
             } else if ("employees".equals(proxyPath) && employeesHandlers.containsKey(httpMethod)) {
@@ -169,32 +170,28 @@ public class EmployeeHandler implements RequestHandler<Map<String, Object>, Map<
             } else if ("employees/salary/top".equals(proxyPath) && topSalaryHandlers.containsKey(httpMethod)) {
                 topSalaryHandlers.get(httpMethod).run();
             } else {
-                logger.warn("Ruta o método no encontrados: {} - {}", proxyPath, httpMethod);
+                logger.warn("Ruta o metodo no encontrados: {} - {}", proxyPath, httpMethod);
                 response.put("statusCode", 404);
-                response.put("body", "Ruta o método no encontrados.");
+                response.put("body", "Ruta o metodo no encontrados.");
             }
 
-            // Buscar el handler correcto
-            /**
-             * Map<String, Runnable> methodMap = routeHandlers.get(path); if
-             * (methodMap != null && methodMap.containsKey(httpMethod)) {
-             * methodMap.get(httpMethod).run(); } else { //En Caso de que la
-             * ruta enviada no este definida, devuelve un codigo de estado HTTP
-             * 404, NOT_FOUND logger.warn("Ruta o método no encontrados: {} -
-             * {}", path, httpMethod); response.put("statusCode", 404);
-             * response.put("body", "Ruta o método no encontrados.");
-            }
-             */
         } catch (Exception e) {
-            logger.error("Error inesperado en la ejecución del handler", e);
+            logger.error("Error inesperado en la ejecucion del handler", e);
             response.put("statusCode", 500);
             response.put("body", "Error interno: " + e.getMessage());
         }
 
-        logger.info("[Fin] Finaliza ejecución con código: {}", response.get("statusCode"));
+        // Fuerza cabecera de respuesta como JSON (mejora la compatibilidad con API Gateway y clientes)
+        response.put("headers", Map.of("Content-Type", "application/json"));
+
+        logger.info("[Fin] Finaliza ejecucion con codigo: {}", response.get("statusCode"));
         return response;
     }
 
+    /**
+     * Extrae el ID del path proxy enviado por API Gateway (ej: "employees/3")
+     * En caso de formato invalido devuelve error 400 y retorna null
+     */
     private Integer extractIdFromProxy(String proxyPath, Map<String, Object> response) {
         if (proxyPath == null || !proxyPath.matches("employees/\\d+")) {
             response.put("statusCode", 400);
@@ -203,5 +200,4 @@ public class EmployeeHandler implements RequestHandler<Map<String, Object>, Map<
         }
         return Integer.parseInt(proxyPath.split("/")[1]);
     }
-
 }
