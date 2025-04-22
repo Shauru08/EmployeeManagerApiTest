@@ -1,0 +1,19 @@
+SP-4: Procedimiento para actualizar la información de un empleado
+
+CREATE PROCEDURE sp_update_employee(
+    IN p_id INT,
+    IN p_name VARCHAR(100),
+    IN p_position VARCHAR(50),
+    IN p_salary DECIMAL(10,2),
+    IN p_hire_date DATE,
+    IN p_department VARCHAR(100)
+)
+BEGIN
+    UPDATE employees
+    SET name = p_name,
+        position = p_position,
+        salary = p_salary,
+        hire_date = p_hire_date,
+        department = p_department
+    WHERE id = p_id;
+END
