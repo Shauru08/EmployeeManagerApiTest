@@ -1,15 +1,9 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package com.employee_manager_api.util;
 
-/**
- *
- * @author loren
- */
 public class FormatUtils {
 
+    // Metodo estatico para construir un mensaje JSON plano con clave y valor.
+    // Escapa comillas dobles del valor para evitar errores de formato.
     public static String jsonMessage(String key, String value) {
         return String.format("{\"%s\":\"%s\"}", key, value.replace("\"", "\\\""));
     }
