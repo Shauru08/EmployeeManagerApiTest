@@ -14,19 +14,21 @@ public class MainClass {
         try {
             logger.info("Probando conexion a la base de datos...");
 
-            // Obtener la instancia de DatabaseConnection
+            // Obtener la instancia de DatabaseConnection (singleton)
             DatabaseConnection dbInstance = DatabaseConnection.getInstance();
             Connection connection = dbInstance.getConnection();
 
+            // Verifica si la conexion esta activa
             if (connection != null && !connection.isClosed()) {
                 logger.info("Conexion exitosa a la base de datos.");
             } else {
                 logger.error("Error: No se pudo conectar a la base de datos.");
             }
 
-            // Cerrar conexión después de la prueba
+            // Cierra la conexion despues de la prueba
             dbInstance.closeConnection();
             logger.info("Conexion cerrada correctamente.");
+
         } catch (Exception e) {
             logger.error("Error en la conexion: {}", e.getMessage(), e);
         }

@@ -16,81 +16,55 @@ import java.util.concurrent.*;
 public class EmployeeService {
 
     private static final Logger logger = LogManager.getLogger(EmployeeService.class);
+
+    // Thread pool con 3 hilos para procesar archivos S3 en paralelo
     private final ExecutorService executorService = Executors.newFixedThreadPool(3);
+
+    // Repositorio para operaciones CRUD sobre la base de datos
     private final EmployeeRepository employeeRepository = new EmployeeRepository();
 
     //Creo una nueva instancia de S3EmployeeReader, enviando como parametros 2 variables obtenidas desde el entorno donde fuera lanzado la aplicacion ( Local o AWS Lambda )
     private final S3EmployeeReader s3Reader = new S3EmployeeReader(EnvLoad.get("S3_BUCKET"), EnvLoad.get("S3_REGION"));
 
-    /**
-     * Crea un nuevo empleado después de validar los datos.
-     */
+    // Crea un nuevo empleado después de validar su formato
     public void createEmployee(Employee employee) throws Exception {
-        // Validar estructura y contenido del empleado
         EmployeeValidator.validateFormat(employee);
-
         logger.info("Creando nuevo empleado: {}", employee.getName());
-
-        // Insertar en base de datos
         employeeRepository.createEmployee(employee);
     }
 
-    /**
-     * Obtiene todos los empleados de la base de datos.
-     */
+    // Devuelve todos los empleados almacenados en la base de datos
     public List<Employee> getAllEmployees() throws Exception {
         logger.info("Obteniendo lista de empleados...");
-
-        // Llamar al repositorio
         return employeeRepository.getAllEmployees();
     }
 
-    /**
-     * Busca un empleado por su ID.
-     */
+    // Devuelve un empleado según su ID. Lanza error si el ID no es válido. ( 0 )
     public Employee getEmployeeById(int id) throws Exception {
-        // Validar que el ID sea mayor a 0
         if (id <= 0) {
             throw new IllegalArgumentException("El ID del empleado debe ser un numero positivo.");
         }
-
         logger.info("Obteniendo empleado con ID: {}", id);
-
-        // Consultar en base de datos
         return employeeRepository.getEmployeeById(id);
     }
 
-    /**
-     * Actualiza un empleado después de validar los datos.
-     */
+    // Actualiza un empleado después de validar sus datos
     public void updateEmployee(Employee employee) throws Exception {
-        // Validar datos del empleado
         EmployeeValidator.validateFormat(employee);
-
         logger.info("Actualizando empleado con ID: {}", employee.getId());
-
-        // Ejecutar actualizacion en base de datos
         employeeRepository.updateEmployee(employee);
     }
 
-    /**
-     * Elimina un empleado por ID.
-     */
+    // Elimina un empleado según su ID. Lanza error si el ID es inválido. ( 0 )
     public void deleteEmployee(int id) throws Exception {
-        // Validar que el ID sea mayor a 0
         if (id <= 0) {
             throw new IllegalArgumentException("El ID del empleado debe ser un numero positivo.");
         }
-
         logger.info("Eliminando empleado con ID: {}", id);
-
-        // Ejecutar eliminacion
         employeeRepository.deleteEmployee(id);
     }
 
-    /**
-     * Obtiene los 10 empleados con mayor salario leyendo archivos desde S3.
-     */
+    // Obtiene los 10 empleados con mayores salarios desde archivos JSON en S3
     public List<Employee> getTopSalaries() {
         logger.info("[Init] Obteniendo empleados desde archivos S3...");
 
@@ -118,7 +92,7 @@ public class EmployeeService {
         // Ordenar por salario descendente
         allEmployees.sort(Comparator.comparingDouble(Employee::getSalary).reversed());
 
-        // Devolver top 10 o menos si hay menos empleados
+        // Retornar los 10 con mayor salario (o todos si hay menos)
         return allEmployees.subList(0, Math.min(10, allEmployees.size()));
     }
 }

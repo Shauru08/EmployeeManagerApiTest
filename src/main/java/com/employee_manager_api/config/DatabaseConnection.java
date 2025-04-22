@@ -29,74 +29,71 @@ public class DatabaseConnection {
 
     private static final Logger logger = LogManager.getLogger(DatabaseConnection.class);
 
+    // Instancia unica para aplicar singleton
     private static DatabaseConnection instance;
+
+    // Conexion a la base de datos
     private Connection connection;
 
-    /**
-     * Leo variables desde el entorno donde se encuentre lanzada la aplicacion (
-     * Local o AWS Lambda )
-     */
+    // Variables de entorno necesarias para conectar a AWS y obtener los secretos
     private static final String SECRET_ARN = EnvLoad.get("SECRET_ARN");
     private static final String AWS_REGION = EnvLoad.get("MY_AWS_REGION");
     private static final String AWS_ACCESS_KEY_ID = EnvLoad.get("MY_AWS_ACCESS_KEY_ID");
     private static final String AWS_SECRET_ACCESS_KEY = EnvLoad.get("MY_AWS_SECRET_ACCESS_KEY");
     private static final String DB_INSTANCE_IDENTIFIER = EnvLoad.get("DB_INSTANCE_IDENTIFIER");
 
-    /**
-     * Constructor privado que inicializa la conexion a la base de datos. Se
-     * obtiene la configuracion de AWS Secrets Manager para acceder de manera
-     * segura a las credenciales de la base de datos.
-     */
+    // Constructor privado que inicializa la conexion usando datos de Secrets Manager y RDS
     private DatabaseConnection() throws Exception {
         logger.info("[Init] Iniciando conexion a la base de datos...");
 
-        // Verifica si las credenciales de AWS estan presentes
+        // Verifica si las credenciales fueron cargadas correctamente
         if (AWS_ACCESS_KEY_ID == null || AWS_SECRET_ACCESS_KEY == null) {
             logger.error("Credenciales de AWS no configuradas");
             throw new IllegalStateException("Las credenciales de AWS no estan configuradas.");
         }
 
-        // Crea credenciales básicas de AWS para los clientes de SDK
+        // Crea cliente para comunicarse con AWS
         AwsBasicCredentials awsCreds = AwsBasicCredentials.create(AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY);
 
-        // Configura el cliente de AWS Secrets Manager
+        // Configura Secrets Manager y solicita el secreto
         logger.info("Inicializando Secrets Manager en región {}", AWS_REGION);
         SecretsManagerClient secretsClient = SecretsManagerClient.builder()
                 .region(Region.of(AWS_REGION))
                 .credentialsProvider(StaticCredentialsProvider.create(awsCreds))
                 .build();
 
-        // Solicita el secreto usando el ARN proporcionado
         logger.info("Obteniendo secreto con ARN: {}", SECRET_ARN);
-        GetSecretValueResponse response = secretsClient.getSecretValue(GetSecretValueRequest.builder()
-                .secretId(SECRET_ARN)
-                .build());
+        GetSecretValueResponse response = secretsClient.getSecretValue(
+                GetSecretValueRequest.builder().secretId(SECRET_ARN).build()
+        );
         logger.info("Secreto recuperado correctamente");
 
-        // Extrae del JSON los valores de acceso (usuario, contraseña, nombre de base)
+        // Parsea el JSON y obtiene credenciales de acceso
         JsonObject secretJson = JsonParser.parseString(response.secretString()).getAsJsonObject();
         String username = secretJson.get("username").getAsString();
         String password = secretJson.get("password").getAsString();
         String dbIdentifier = secretJson.has("dbInstanceIdentifier") && !secretJson.get("dbInstanceIdentifier").isJsonNull()
                 ? secretJson.get("dbInstanceIdentifier").getAsString()
                 : DB_INSTANCE_IDENTIFIER;
+
         logger.info("Identificador de base obtenido: {}", dbIdentifier);
 
-        // Construye el cliente RDS para consultar los datos del endpoint
+        // Solicita a RDS la metadata de la instancia
         logger.info("Consultando RDS con identificador: {}", dbIdentifier);
         RdsClient rdsClient = RdsClient.builder()
                 .region(Region.of(AWS_REGION))
                 .credentialsProvider(StaticCredentialsProvider.create(awsCreds))
                 .build();
 
-        // Obtiene información de la instancia como host y puerto
         DescribeDbInstancesResponse dbResponse = rdsClient.describeDBInstances(
-                DescribeDbInstancesRequest.builder().dbInstanceIdentifier(dbIdentifier).build());
+                DescribeDbInstancesRequest.builder().dbInstanceIdentifier(dbIdentifier).build()
+        );
         logger.info("Metadatos de instancia RDS obtenidos");
 
         DBInstance instance = dbResponse.dbInstances().get(0);
         String host = instance.endpoint().address();
         String port = String.valueOf(instance.endpoint().port());
+
         logger.info("Endpoint de RDS: {}:{}", host, port);
 
         // Construye la cadena de conexion JDBC
@@ -104,6 +101,7 @@ public class DatabaseConnection {
                 "jdbc:mysql://%s:%s/%s?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC",
                 host, port, dbIdentifier
         );
+
         logger.info("Conectando a base de datos con URL JDBC armada");
 
         // Establece la conexion
@@ -111,16 +109,10 @@ public class DatabaseConnection {
         logger.info("Conexion a la base de datos establecida correctamente.");
     }
 
-    /**
-     * Metodo estatico para obtener la instancia unica del objeto de conexion.
-     * Se utiliza patron Singleton y garantiza que no haya multiples instancias
-     * activas.
-     */
+    // Retorna la unica instancia activa. Si no existe o esta cerrada, se crea una nueva.
     public static DatabaseConnection getInstance() throws Exception {
         if (instance == null || instance.connection.isClosed()) {
-            // Synchronized forma ademas una especie de cola donde, si la conexion esta ocupada, el siguiente hilo esperara su turno antes de acceder.
             synchronized (DatabaseConnection.class) {
-                // Verifica nuevamente dentro del bloque sincronizado
                 if (instance == null || instance.connection.isClosed()) {
                     instance = new DatabaseConnection();
                 }
@@ -129,17 +121,12 @@ public class DatabaseConnection {
         return instance;
     }
 
-    /**
-     * Retorna la conexion activa a la base de datos.
-     */
+    // Retorna el objeto de conexion reutilizable
     public Connection getConnection() {
-        // Devuelve el objeto de conexion que se esta reutilizando
         return connection;
     }
 
-    /**
-     * Cierra la conexion a la base de datos si esta abierta.
-     */
+    // Cierra la conexion si esta abierta
     public void closeConnection() {
         try {
             // Verifica si la conexion esta activa antes de cerrarla

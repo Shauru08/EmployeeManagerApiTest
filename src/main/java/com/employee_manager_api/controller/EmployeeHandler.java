@@ -19,31 +19,35 @@ public class EmployeeHandler implements RequestHandler<Map<String, Object>, Map<
     private final EmployeeService employeeService = new EmployeeService();
     private final Gson gson = new Gson();
 
+    // Metodo principal que actua como punto de entrada para AWS Lambda
     @Override
     public Map<String, Object> handleRequest(Map<String, Object> input, Context context) {
-        //Objeto response que es serializado a un JSON
+        // Objeto response que es serializado a un JSON como respuesta HTTP
         Map<String, Object> response = new HashMap<>();
         try {
             logger.info("Input entrante: {}", input);
-            //Obtengo la ruta plantilla definida en API Gateway, ("/employees",/employees/{id} ,"/employees/salary/top")
+
+            // Obtengo la ruta y el metodo HTTP desde la request recibida por API Gateway  ("/employees",/employees/{id} ,"/employees/salary/top")
             String path = (String) input.get("path");
             String httpMethod = (String) input.get("httpMethod");
 
             logger.info("[Init] Request recibida - Ruta: {} - Metodo: {}", path, httpMethod);
 
-            // Extraer proxyPath desde pathParameters
+            // Extraigo el valor de path "proxy", puede ser "employees", "employees/1", etc.
             Map<String, String> pathParams = (Map<String, String>) input.get("pathParameters");
             logger.debug("PathParams entrante: {}", input);
             final String proxyPath = (pathParams != null) ? pathParams.get("proxy") : null;
 
             logger.info("Proxy path recibido: {}", proxyPath);
 
-            //map "padre" que contendra posteriormente los subMapas correspondientes a las distintas rutas bajo /employee
+            //Map "padre" que contendra posteriormente los subMapas correspondientes a las distintas rutas bajo /employee
             Map<String, Map<String, Runnable>> routeHandlers = new HashMap<>();
 
-            // Submapas por ruta
+            // Submapa de handlers para rutas base "/employees"
             Map<String, Runnable> employeesHandlers = new HashMap<>();
+            // Submapa de handlers para rutas tipo "/employees/{id}"
             Map<String, Runnable> employeeIdHandlers = new HashMap<>();
+            // Submapa de handlers para ruta "/employees/salary/top"
             Map<String, Runnable> topSalaryHandlers = new HashMap<>();
 
             // /employees GET
@@ -144,7 +148,7 @@ public class EmployeeHandler implements RequestHandler<Map<String, Object>, Map<
 
             // /employees/salary/top GET
             topSalaryHandlers.put("GET", () -> {
-                //Devuelve una lista de los 10 empleados con los salarios mas altos
+                // Devuelve top 10 empleados con mayor salario
                 try {
                     logger.info("Obteniendo empleados con los mayores salarios");
                     List<Employee> topEmployees = employeeService.getTopSalaries();
@@ -157,12 +161,12 @@ public class EmployeeHandler implements RequestHandler<Map<String, Object>, Map<
                 }
             });
 
-            // Cargo los 3 map de rutas individuales en un map "padre" que me permite iterar sobre todas a la vez
+            // Cargo todos los submapas en el mapa principal para gestionarlos segun la ruta
             routeHandlers.put("/employees", employeesHandlers);
             routeHandlers.put("/employees/{id}", employeeIdHandlers);
             routeHandlers.put("/employees/salary/top", topSalaryHandlers);
 
-            // Routing manual basado en proxyPath
+            // Logica de ruteo manual basada en proxyPath y metodo HTTP
             if (proxyPath != null && proxyPath.matches("employees/\\d+") && employeeIdHandlers.containsKey(httpMethod)) {
                 employeeIdHandlers.get(httpMethod).run();
             } else if ("employees".equals(proxyPath) && employeesHandlers.containsKey(httpMethod)) {
@@ -188,10 +192,7 @@ public class EmployeeHandler implements RequestHandler<Map<String, Object>, Map<
         return response;
     }
 
-    /**
-     * Extrae el ID del path proxy enviado por API Gateway (ej: "employees/3")
-     * En caso de formato invalido devuelve error 400 y retorna null
-     */
+    // Extrae el ID del path tipo "employees/{id}". Si es invalido, responde con error 400.
     private Integer extractIdFromProxy(String proxyPath, Map<String, Object> response) {
         if (proxyPath == null || !proxyPath.matches("employees/\\d+")) {
             response.put("statusCode", 400);

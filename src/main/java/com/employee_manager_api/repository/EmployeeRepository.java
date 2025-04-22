@@ -13,12 +13,7 @@ public class EmployeeRepository {
 
     private static final Logger logger = LogManager.getLogger(EmployeeRepository.class);
 
-    /**
-     * Obtiene todos los empleados de la base de datos.
-     *
-     * @return Lista de empleados.
-     * @throws Exception si ocurre un error en la consulta.
-     */
+    // Devuelve una lista con todos los empleados consultando el SP sp_get_all_employees
     public List<Employee> getAllEmployees() throws Exception {
         logger.info("[DB] Obteniendo todos los empleados...");
         List<Employee> employees = new ArrayList<>();
@@ -29,20 +24,16 @@ public class EmployeeRepository {
             while (rs.next()) {
                 employees.add(mapResultSetToEmployee(rs));
             }
+
         } catch (SQLException e) {
             logger.error("[DB] Error al obtener empleados: ", e);
             throw new Exception("Error al obtener empleados", e);
         }
+
         return employees;
     }
 
-    /**
-     * Obtiene un empleado por su ID.
-     *
-     * @param id Identificador único del empleado.
-     * @return Objeto Employee encontrado o null si no existe.
-     * @throws Exception si ocurre un error en la consulta.
-     */
+    // Busca un empleado por ID ejecutando el SP sp_get_employee_by_id
     public Employee getEmployeeById(int id) throws Exception {
         logger.info("[DB] Buscando empleado con ID: {}", id);
         String query = "{ CALL sp_get_employee_by_id(?) }";
@@ -55,6 +46,7 @@ public class EmployeeRepository {
                     return mapResultSetToEmployee(rs);
                 }
             }
+
         } catch (SQLException e) {
             logger.error("[DB] Error al obtener empleado con ID {}: ", id, e);
             throw new Exception("Error al obtener empleado con ID " + id, e);
@@ -62,12 +54,7 @@ public class EmployeeRepository {
         return null; // Si no se encuentra el empleado, retorna null.
     }
 
-    /**
-     * Inserta un nuevo empleado en la base de datos.
-     *
-     * @param employee Objeto Employee con los datos a insertar.
-     * @throws Exception si ocurre un error en la base de datos.
-     */
+    // Inserta un nuevo empleado en la base usando el SP sp_create_employee
     public void createEmployee(Employee employee) throws Exception {
         logger.info("[DB] Insertando nuevo empleado: {}", employee.getName());
         String query = "{ CALL sp_create_employee(?, ?, ?, ?, ?) }";
@@ -82,18 +69,14 @@ public class EmployeeRepository {
 
             stmt.executeUpdate();
             logger.info("[DB] Empleado {} insertado correctamente.", employee.getName());
+
         } catch (SQLException e) {
             logger.error("[DB] Error al insertar empleado: ", e);
             throw new Exception("Error al insertar empleado", e);
         }
     }
 
-    /**
-     * Actualiza la información de un empleado en la base de datos.
-     *
-     * @param employee Objeto Employee con los datos actualizados.
-     * @throws Exception si ocurre un error en la base de datos.
-     */
+    // Actualiza los datos de un empleado en base a su ID usando el SP sp_update_employee
     public void updateEmployee(Employee employee) throws Exception {
         logger.info("[DB] Actualizando empleado con ID: {}", employee.getId());
         String query = "{ CALL sp_update_employee(?, ?, ?, ?, ?, ?) }";
@@ -109,18 +92,14 @@ public class EmployeeRepository {
 
             stmt.executeUpdate();
             logger.info("[DB] Empleado con ID {} actualizado correctamente.", employee.getId());
+
         } catch (SQLException e) {
             logger.error("[DB] Error al actualizar empleado con ID {}: ", employee.getId(), e);
             throw new Exception("Error al actualizar empleado con ID " + employee.getId(), e);
         }
     }
 
-    /**
-     * Elimina un empleado de la base de datos por su ID.
-     *
-     * @param id Identificador del empleado a eliminar.
-     * @throws Exception si ocurre un error en la base de datos.
-     */
+    // Elimina un empleado por ID ejecutando el SP sp_delete_employee
     public void deleteEmployee(int id) throws Exception {
         logger.info("[DB] Eliminando empleado con ID: {}", id);
         String query = "{ CALL sp_delete_employee(?) }";
@@ -130,20 +109,16 @@ public class EmployeeRepository {
             stmt.setInt(1, id);
             stmt.executeUpdate();
             logger.info("[DB] Empleado con ID {} eliminado correctamente.", id);
+
         } catch (SQLException e) {
             logger.error("[DB] Error al eliminar empleado con ID {}: ", id, e);
             throw new Exception("Error al eliminar empleado con ID " + id, e);
         }
     }
 
-    /**
-     * Mapea un ResultSet a un objeto Employee.
-     *
-     * @param rs ResultSet con los datos del empleado.
-     * @return Objeto Employee.
-     * @throws SQLException si ocurre un error al acceder a los datos.
-     */
+    // Mapea un ResultSet a un objeto Employee.
     private Employee mapResultSetToEmployee(ResultSet rs) throws SQLException {
+        //En una posible migracion a spring esto seria un RowMapper.
         return new Employee(
                 rs.getInt("id"),
                 rs.getString("name"),

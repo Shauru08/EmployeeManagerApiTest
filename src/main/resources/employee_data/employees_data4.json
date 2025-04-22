@@ -1,0 +1,402 @@
+[
+    {
+        "id": 1,
+        "name": "Robert Morgan",
+        "position": "Manager",
+        "salary": 30737.76,
+        "hire_date": "2023-06-17",
+        "department": "Marketing"
+    },
+    {
+        "id": 2,
+        "name": "Debra Martinez",
+        "position": "Specialist",
+        "salary": 82454.39,
+        "hire_date": "2015-07-27",
+        "department": "IT"
+    },
+    {
+        "id": 3,
+        "name": "Aaron Howell",
+        "position": "Analyst",
+        "salary": 45918.25,
+        "hire_date": "2019-09-12",
+        "department": "Engineering"
+    },
+    {
+        "id": 4,
+        "name": "Scott Cooper MD",
+        "position": "Developer",
+        "salary": 92775.79,
+        "hire_date": "2018-11-28",
+        "department": "Engineering"
+    },
+    {
+        "id": 5,
+        "name": "Shannon Hammond",
+        "position": "Engineer",
+        "salary": 100520.38,
+        "hire_date": "2015-10-25",
+        "department": "Marketing"
+    },
+    {
+        "id": 6,
+        "name": "John Williamson",
+        "position": "Specialist",
+        "salary": 113882.79,
+        "hire_date": "2022-03-27",
+        "department": "Sales"
+    },
+    {
+        "id": 7,
+        "name": "Denise Watkins",
+        "position": "Analyst",
+        "salary": 63935.56,
+        "hire_date": "2025-01-30",
+        "department": "HR"
+    },
+    {
+        "id": 8,
+        "name": "Susan Le",
+        "position": "Analyst",
+        "salary": 103486.21,
+        "hire_date": "2020-06-12",
+        "department": "IT"
+    },
+    {
+        "id": 9,
+        "name": "Joshua Jones",
+        "position": "Developer",
+        "salary": 120358.32,
+        "hire_date": "2017-08-10",
+        "department": "Finance"
+    },
+    {
+        "id": 10,
+        "name": "Victoria Dodson",
+        "position": "Coordinator",
+        "salary": 69339.64,
+        "hire_date": "2022-10-06",
+        "department": "Sales"
+    },
+    {
+        "id": 11,
+        "name": "Jonathan Vaughn",
+        "position": "Developer",
+        "salary": 104170.35,
+        "hire_date": "2017-05-02",
+        "department": "Marketing"
+    },
+    {
+        "id": 12,
+        "name": "Raymond Kelley",
+        "position": "Coordinator",
+        "salary": 92497.4,
+        "hire_date": "2023-01-16",
+        "department": "Marketing"
+    },
+    {
+        "id": 13,
+        "name": "Zachary Ruiz",
+        "position": "Developer",
+        "salary": 94753.22,
+        "hire_date": "2016-01-31",
+        "department": "Finance"
+    },
+    {
+        "id": 14,
+        "name": "Joshua Terry",
+        "position": "Engineer",
+        "salary": 80654.65,
+        "hire_date": "2024-04-21",
+        "department": "Sales"
+    },
+    {
+        "id": 15,
+        "name": "Jamie Vargas",
+        "position": "Specialist",
+        "salary": 35725.17,
+        "hire_date": "2020-03-10",
+        "department": "IT"
+    },
+    {
+        "id": 16,
+        "name": "Allison Bell",
+        "position": "Specialist",
+        "salary": 41514.47,
+        "hire_date": "2024-01-10",
+        "department": "IT"
+    },
+    {
+        "id": 17,
+        "name": "John Mitchell",
+        "position": "Specialist",
+        "salary": 46825.41,
+        "hire_date": "2019-12-15",
+        "department": "Marketing"
+    },
+    {
+        "id": 18,
+        "name": "Kimberly Adams",
+        "position": "Coordinator",
+        "salary": 55664.45,
+        "hire_date": "2017-07-06",
+        "department": "Marketing"
+    },
+    {
+        "id": 19,
+        "name": "Marcus Robinson",
+        "position": "Developer",
+        "salary": 78496.55,
+        "hire_date": "2019-03-07",
+        "department": "Marketing"
+    },
+    {
+        "id": 20,
+        "name": "Omar Short",
+        "position": "Engineer",
+        "salary": 102199.38,
+        "hire_date": "2017-10-10",
+        "department": "Marketing"
+    },
+    {
+        "id": 21,
+        "name": "Alexis Brown",
+        "position": "Engineer",
+        "salary": 78185.36,
+        "hire_date": "2018-03-03",
+        "department": "Engineering"
+    },
+    {
+        "id": 22,
+        "name": "Victoria Rowland",
+        "position": "Specialist",
+        "salary": 38563.27,
+        "hire_date": "2016-12-13",
+        "department": "Finance"
+    },
+    {
+        "id": 23,
+        "name": "James Mitchell",
+        "position": "Manager",
+        "salary": 117592.14,
+        "hire_date": "2018-08-10",
+        "department": "Marketing"
+    },
+    {
+        "id": 24,
+        "name": "Tonya Rodriguez",
+        "position": "Engineer",
+        "salary": 76707.89,
+        "hire_date": "2023-04-09",
+        "department": "Finance"
+    },
+    {
+        "id": 25,
+        "name": "Bobby Simmons",
+        "position": "Engineer",
+        "salary": 36144.8,
+        "hire_date": "2018-09-18",
+        "department": "Sales"
+    },
+    {
+        "id": 26,
+        "name": "Grant Townsend",
+        "position": "Manager",
+        "salary": 107560.09,
+        "hire_date": "2017-08-15",
+        "department": "Engineering"
+    },
+    {
+        "id": 27,
+        "name": "Anthony Long",
+        "position": "Engineer",
+        "salary": 56948.06,
+        "hire_date": "2015-08-10",
+        "department": "IT"
+    },
+    {
+        "id": 28,
+        "name": "Toni Smith",
+        "position": "Coordinator",
+        "salary": 96003.73,
+        "hire_date": "2019-03-30",
+        "department": "Sales"
+    },
+    {
+        "id": 29,
+        "name": "Abigail Robinson",
+        "position": "Manager",
+        "salary": 63911.0,
+        "hire_date": "2024-09-22",
+        "department": "Marketing"
+    },
+    {
+        "id": 30,
+        "name": "Bryan Wilson",
+        "position": "Coordinator",
+        "salary": 69609.7,
+        "hire_date": "2021-04-22",
+        "department": "HR"
+    },
+    {
+        "id": 31,
+        "name": "Travis Clark",
+        "position": "Coordinator",
+        "salary": 110485.96,
+        "hire_date": "2024-01-22",
+        "department": "Finance"
+    },
+    {
+        "id": 32,
+        "name": "Elizabeth Hunter",
+        "position": "Developer",
+        "salary": 50296.95,
+        "hire_date": "2021-08-07",
+        "department": "HR"
+    },
+    {
+        "id": 33,
+        "name": "Elizabeth Garcia",
+        "position": "Developer",
+        "salary": 100681.96,
+        "hire_date": "2020-01-20",
+        "department": "IT"
+    },
+    {
+        "id": 34,
+        "name": "Melissa Massey",
+        "position": "Specialist",
+        "salary": 53922.34,
+        "hire_date": "2023-07-18",
+        "department": "Marketing"
+    },
+    {
+        "id": 35,
+        "name": "Jessica Acevedo",
+        "position": "Analyst",
+        "salary": 96896.14,
+        "hire_date": "2016-08-07",
+        "department": "HR"
+    },
+    {
+        "id": 36,
+        "name": "Gabriel Wade",
+        "position": "Coordinator",
+        "salary": 37076.19,
+        "hire_date": "2021-04-19",
+        "department": "IT"
+    },
+    {
+        "id": 37,
+        "name": "Danielle Keller",
+        "position": "Developer",
+        "salary": 68319.37,
+        "hire_date": "2019-06-17",
+        "department": "Sales"
+    },
+    {
+        "id": 38,
+        "name": "Crystal Hopkins",
+        "position": "Engineer",
+        "salary": 111959.33,
+        "hire_date": "2021-11-14",
+        "department": "Engineering"
+    },
+    {
+        "id": 39,
+        "name": "Mary Cruz",
+        "position": "Analyst",
+        "salary": 122119.02,
+        "hire_date": "2023-02-15",
+        "department": "Finance"
+    },
+    {
+        "id": 40,
+        "name": "Christopher Rogers",
+        "position": "Engineer",
+        "salary": 114256.95,
+        "hire_date": "2024-08-24",
+        "department": "Finance"
+    },
+    {
+        "id": 41,
+        "name": "Jeffrey Washington DVM",
+        "position": "Developer",
+        "salary": 73110.84,
+        "hire_date": "2019-04-25",
+        "department": "Finance"
+    },
+    {
+        "id": 42,
+        "name": "Benjamin Henderson",
+        "position": "Manager",
+        "salary": 71888.27,
+        "hire_date": "2020-09-30",
+        "department": "Marketing"
+    },
+    {
+        "id": 43,
+        "name": "Benjamin Brown",
+        "position": "Manager",
+        "salary": 41874.13,
+        "hire_date": "2015-07-05",
+        "department": "HR"
+    },
+    {
+        "id": 44,
+        "name": "Marc Harris",
+        "position": "Coordinator",
+        "salary": 61516.27,
+        "hire_date": "2022-08-30",
+        "department": "Marketing"
+    },
+    {
+        "id": 45,
+        "name": "Heidi Palmer",
+        "position": "Engineer",
+        "salary": 68402.11,
+        "hire_date": "2022-02-22",
+        "department": "Finance"
+    },
+    {
+        "id": 46,
+        "name": "Christopher Rice",
+        "position": "Specialist",
+        "salary": 41845.6,
+        "hire_date": "2018-12-13",
+        "department": "Finance"
+    },
+    {
+        "id": 47,
+        "name": "Michael Schroeder",
+        "position": "Specialist",
+        "salary": 65156.47,
+        "hire_date": "2022-12-09",
+        "department": "Sales"
+    },
+    {
+        "id": 48,
+        "name": "Bryan Moore",
+        "position": "Manager",
+        "salary": 41519.42,
+        "hire_date": "2022-10-08",
+        "department": "IT"
+    },
+    {
+        "id": 49,
+        "name": "Andrew White",
+        "position": "Coordinator",
+        "salary": 56693.29,
+        "hire_date": "2018-09-15",
+        "department": "Marketing"
+    },
+    {
+        "id": 50,
+        "name": "Heidi Ortiz",
+        "position": "Engineer",
+        "salary": 95699.89,
+        "hire_date": "2022-05-07",
+        "department": "Sales"
+    }
+]
