@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" 
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 
+         http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.employee_manager_api</groupId>
     <artifactId>EmployeeManagerApi</artifactId>
@@ -24,6 +28,27 @@
         <dependency>
             <groupId>software.amazon.awssdk</groupId>
             <artifactId>secretsmanager</artifactId>
+            <version>2.20.37</version>
+        </dependency>
+
+        <!-- AWS SDK para Amazon RDS (para obtener metadatos de la instancia) -->
+        <dependency>
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>rds</artifactId>
+            <version>2.20.37</version>
+        </dependency>
+
+        <!-- AWS SDK - Manejo de regiones (necesario para clientes como RDS/SecretsManager) -->
+        <dependency>
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>regions</artifactId>
+            <version>2.20.37</version>
+        </dependency>
+
+        <!-- AWS SDK - Autenticación de credenciales (usado por StaticCredentialsProvider) -->
+        <dependency>
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>auth</artifactId>
             <version>2.20.37</version>
         </dependency>
 

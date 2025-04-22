@@ -5,6 +5,7 @@ import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.google.gson.Gson;
 import com.employee_manager_api.domain.entity.Employee;
 import com.employee_manager_api.service.EmployeeService;
+import com.employee_manager_api.util.FormatUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -28,7 +29,7 @@ public class EmployeeHandler implements RequestHandler<Map<String, Object>, Map<
             String path = (String) input.get("path");
             String httpMethod = (String) input.get("httpMethod");
 
-            logger.info("[Init] Request recibida - Ruta: {} - Método: {}", path, httpMethod);
+            logger.info("[Init] Request recibida - Ruta: {} - Metodo: {}", path, httpMethod);
 
             // Extraer proxyPath desde pathParameters
             Map<String, String> pathParams = (Map<String, String>) input.get("pathParameters");
@@ -54,10 +55,9 @@ public class EmployeeHandler implements RequestHandler<Map<String, Object>, Map<
                     response.put("statusCode", 200);
                     response.put("body", gson.toJson(employees));
                 } catch (Exception e) {
-                    //En caso de que ocurra una excepcion dentro de la clase service sera, devuelve un codigo de estado HTTP 500, INTERNAL_SERVER_ERROR.
                     logger.error("Error al obtener empleados", e);
                     response.put("statusCode", 500);
-                    response.put("body", "Error al obtener empleados: " + e.getMessage());
+                    response.put("body", FormatUtils.jsonMessage("error", "Error al obtener empleados: " + e.getMessage()));
                 }
             });
 
@@ -70,18 +70,17 @@ public class EmployeeHandler implements RequestHandler<Map<String, Object>, Map<
                     Employee newEmployee = gson.fromJson(body, Employee.class);
                     employeeService.createEmployee(newEmployee);
                     response.put("statusCode", 201);
-                    response.put("body", "Empleado creado correctamente.");
+                    response.put("body", FormatUtils.jsonMessage("message", "Empleado creado correctamente."));
                 } catch (Exception e) {
-                    //En caso de que ocurra una excepcion dentro de la clase service sera, devuelve un codigo de estado HTTP 500, INTERNAL_SERVER_ERROR.
                     logger.error("Error al crear empleado", e);
                     response.put("statusCode", 500);
-                    response.put("body", "Error al crear empleado: " + e.getMessage());
+                    response.put("body", FormatUtils.jsonMessage("error", "Error al crear empleado: " + e.getMessage()));
                 }
             });
 
             // /employees/{id} GET
             employeeIdHandlers.put("GET", () -> {
-                //Devuelve un json conteniendo la informacion de un unico empleado, filtrando por ID, en caso exitoso, devuelve un codigo de estado HTTP 200, Ok.
+                //Devuelve un json conteniendo la informacion de un unico empleado, filtrando por ID
                 try {
                     Integer id = extractIdFromProxy(proxyPath, response);
                     if (id == null) {
@@ -90,17 +89,21 @@ public class EmployeeHandler implements RequestHandler<Map<String, Object>, Map<
                     logger.info("Obteniendo empleado con ID: {}", id);
                     Employee emp = employeeService.getEmployeeById(id);
                     response.put("statusCode", 200);
-                    response.put("body", gson.toJson(emp));
+                    if (emp == null) {
+                        response.put("body", FormatUtils.jsonMessage("error", "No se encontro ningun usuario con el id: " + id));
+                    } else {
+                        response.put("body", gson.toJson(emp));
+                    }
                 } catch (Exception e) {
                     logger.error("Error al obtener empleado por ID", e);
                     response.put("statusCode", 500);
-                    response.put("body", "Error al obtener empleado por ID: " + e.getMessage());
+                    response.put("body", FormatUtils.jsonMessage("error", "Error al obtener empleado por ID: " + e.getMessage()));
                 }
             });
 
             // /employees/{id} PUT
             employeeIdHandlers.put("PUT", () -> {
-                //Modifica la informacion de un usuario, filtrandolo por ID, en caso exitoso, devuelve un codigo de estado HTTP 200, Ok.
+                //Modifica la informacion de un usuario, filtrandolo por ID
                 try {
                     Integer id = extractIdFromProxy(proxyPath, response);
                     if (id == null) {
@@ -112,18 +115,17 @@ public class EmployeeHandler implements RequestHandler<Map<String, Object>, Map<
                     logger.info("Actualizando empleado con ID: {}", id);
                     employeeService.updateEmployee(updatedEmployee);
                     response.put("statusCode", 200);
-                    response.put("body", "Empleado actualizado.");
+                    response.put("body", FormatUtils.jsonMessage("message", "Empleado actualizado."));
                 } catch (Exception e) {
-                    //En caso de que ocurra una excepcion dentro de la clase service sera, devuelve un codigo de estado HTTP 500, INTERNAL_SERVER_ERROR.
                     logger.error("Error al actualizar empleado", e);
                     response.put("statusCode", 500);
-                    response.put("body", "Error al actualizar empleado: " + e.getMessage());
+                    response.put("body", FormatUtils.jsonMessage("error", "Error al actualizar empleado: " + e.getMessage()));
                 }
             });
 
             // /employees/{id} DELETE
             employeeIdHandlers.put("DELETE", () -> {
-                //Elimina un registro de la tabla Employee encontrandolo por su ID, es un borrado fisico, en caso exitoso, devuelve un codigo de estado HTTP 200, Ok.
+                //Elimina un registro de la tabla Employee encontrandolo por su ID
                 try {
                     Integer id = extractIdFromProxy(proxyPath, response);
                     if (id == null) {
@@ -132,28 +134,26 @@ public class EmployeeHandler implements RequestHandler<Map<String, Object>, Map<
                     logger.info("Eliminando empleado con ID: {}", id);
                     employeeService.deleteEmployee(id);
                     response.put("statusCode", 200);
-                    response.put("body", "Empleado eliminado.");
+                    response.put("body", FormatUtils.jsonMessage("message", "Empleado eliminado."));
                 } catch (Exception e) {
-                    //En caso de que ocurra una excepcion dentro de la clase service sera, devuelve un codigo de estado HTTP 500, INTERNAL_SERVER_ERROR.
                     logger.error("Error al eliminar empleado", e);
                     response.put("statusCode", 500);
-                    response.put("body", "Error al eliminar empleado: " + e.getMessage());
+                    response.put("body", FormatUtils.jsonMessage("error", "Error al eliminar empleado: " + e.getMessage()));
                 }
             });
 
             // /employees/salary/top GET
             topSalaryHandlers.put("GET", () -> {
-                //Devuelve una lista de los 10 empleados con los salarios más altos ordenados de forma descendente, en caso exitoso, devuelve un codigo de estado HTTP 200, Ok.
+                //Devuelve una lista de los 10 empleados con los salarios mas altos
                 try {
                     logger.info("Obteniendo empleados con los mayores salarios");
                     List<Employee> topEmployees = employeeService.getTopSalaries();
                     response.put("statusCode", 200);
                     response.put("body", gson.toJson(topEmployees));
                 } catch (Exception e) {
-                    //En caso de que ocurra una excepcion dentro de la clase service sera, devuelve un codigo de estado HTTP 500, INTERNAL_SERVER_ERROR.
                     logger.error("Error al obtener empleados con mayores salarios", e);
                     response.put("statusCode", 500);
-                    response.put("body", "Error al obtener empleados con mayores salarios: " + e.getMessage());
+                    response.put("body", FormatUtils.jsonMessage("error", "Error al obtener empleados con mayores salarios: " + e.getMessage()));
                 }
             });
 
@@ -162,6 +162,7 @@ public class EmployeeHandler implements RequestHandler<Map<String, Object>, Map<
             routeHandlers.put("/employees/{id}", employeeIdHandlers);
             routeHandlers.put("/employees/salary/top", topSalaryHandlers);
 
+            // Routing manual basado en proxyPath
             if (proxyPath != null && proxyPath.matches("employees/\\d+") && employeeIdHandlers.containsKey(httpMethod)) {
                 employeeIdHandlers.get(httpMethod).run();
             } else if ("employees".equals(proxyPath) && employeesHandlers.containsKey(httpMethod)) {
@@ -169,39 +170,34 @@ public class EmployeeHandler implements RequestHandler<Map<String, Object>, Map<
             } else if ("employees/salary/top".equals(proxyPath) && topSalaryHandlers.containsKey(httpMethod)) {
                 topSalaryHandlers.get(httpMethod).run();
             } else {
-                logger.warn("Ruta o método no encontrados: {} - {}", proxyPath, httpMethod);
+                logger.warn("Ruta o metodo no encontrados: {} - {}", proxyPath, httpMethod);
                 response.put("statusCode", 404);
-                response.put("body", "Ruta o método no encontrados.");
+                response.put("body", FormatUtils.jsonMessage("error", "Ruta o metodo no encontrados."));
             }
 
-            // Buscar el handler correcto
-            /**
-             * Map<String, Runnable> methodMap = routeHandlers.get(path); if
-             * (methodMap != null && methodMap.containsKey(httpMethod)) {
-             * methodMap.get(httpMethod).run(); } else { //En Caso de que la
-             * ruta enviada no este definida, devuelve un codigo de estado HTTP
-             * 404, NOT_FOUND logger.warn("Ruta o método no encontrados: {} -
-             * {}", path, httpMethod); response.put("statusCode", 404);
-             * response.put("body", "Ruta o método no encontrados.");
-            }
-             */
         } catch (Exception e) {
-            logger.error("Error inesperado en la ejecución del handler", e);
+            logger.error("Error inesperado en la ejecucion del handler", e);
             response.put("statusCode", 500);
-            response.put("body", "Error interno: " + e.getMessage());
+            response.put("body", FormatUtils.jsonMessage("error", "Error interno: " + e.getMessage()));
         }
 
-        logger.info("[Fin] Finaliza ejecución con código: {}", response.get("statusCode"));
+        // Fuerza cabecera de respuesta como JSON
+        response.put("headers", Map.of("Content-Type", "application/json"));
+
+        logger.info("[Fin] Finaliza ejecucion con respuesta: {}", response);
         return response;
     }
 
+    /**
+     * Extrae el ID del path proxy enviado por API Gateway (ej: "employees/3")
+     * En caso de formato invalido devuelve error 400 y retorna null
+     */
     private Integer extractIdFromProxy(String proxyPath, Map<String, Object> response) {
         if (proxyPath == null || !proxyPath.matches("employees/\\d+")) {
             response.put("statusCode", 400);
-            response.put("body", "Formato de URL incorrecto o ID no proporcionado.");
+            response.put("body", FormatUtils.jsonMessage("error", "Formato de URL incorrecto o ID no proporcionado."));
             return null;
         }
         return Integer.parseInt(proxyPath.split("/")[1]);
     }
-
 }

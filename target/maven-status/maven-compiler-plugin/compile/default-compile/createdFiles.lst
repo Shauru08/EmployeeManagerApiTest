@@ -1,10 +1,11 @@
 com\employee_manager_api\domain\entity\Employee.class
+com\employee_manager_api\repository\EmployeeRepository.class
 com\employee_manager_api\util\EmployeeValidator.class
-com\employee_manager_api\MainClass.class
-com\employee_manager_api\config\DatabaseConnection.class
 com\employee_manager_api\config\EnvLoad.class
 com\employee_manager_api\util\S3EmployeeReader.class
-com\employee_manager_api\repository\EmployeeRepository.class
+com\employee_manager_api\MainClass.class
 com\employee_manager_api\controller\EmployeeHandler.class
+com\employee_manager_api\util\FormatUtils.class
 com\employee_manager_api\service\EmployeeService.class
+com\employee_manager_api\config\DatabaseConnection.class
 com\employee_manager_api\util\S3EmployeeReader$1.class
